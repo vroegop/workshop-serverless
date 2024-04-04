@@ -1,0 +1,119 @@
+<html>
+<body>
+<div class="scoreboard-container">
+	<h2>Dart Scoreboard</h2>
+	<p class="player1-score"></p>
+	<p class="player2-score"></p>
+	<p class="player-playing"></p>
+	<button onclick="undoDartThrown(); render();">Undo score</button>
+</div>
+
+<dart-board style="--size: 600px;"></dart-board>
+
+<script>
+	let player1Scores = [];
+	let player2Scores = [];
+	let playersTurn = 1;
+
+	document.querySelector('dart-board').addEventListener('section-hit', (event) => {
+		sendDartScore({ event: event.detail, player: playersTurn });
+	});
+
+	let webSocket;
+	const chatBox = document.getElementById('chat-box');
+
+	const connect = () => {
+		const webSocketURL = 'wss://73t9o52x78.execute-api.eu-west-1.amazonaws.com/dev';
+		webSocket = new WebSocket(webSocketURL);
+
+		webSocket.onmessage = receiveMessage
+	}
+
+	const receiveMessage = ({ data }) => {
+		const { player, event } = JSON.parse(data);
+		if (player === 1) {
+			player1Scores.push(event);
+		} else {
+			player2Scores.push(event);
+		}
+		dartThrown();
+		render();
+	}
+
+	const sendDartScore = detail => {
+		webSocket.send(JSON.stringify(detail));
+	}
+
+	window.onload = connect;
+
+	const totalDartsThrown = () => player1Scores.length + player2Scores.length;
+
+	const dartThrown = () => {
+		if (totalDartsThrown() % 3 === 0) {
+			playersTurn = playersTurn === 1 ? 2 : 1;
+		}
+	}
+
+	const undoDartThrown = () => {
+		if (totalDartsThrown() % 3 === 1 || totalDartsThrown() % 3 === 2) {
+			if (playersTurn === 1) {
+				player1Scores.pop();
+			} else {
+				player2Scores.pop();
+			}
+		} else {
+			if (playersTurn === 1) {
+				player2Scores.pop();
+				playersTurn = 2;
+			} else {
+				player1Scores.pop();
+				playersTurn = 1;
+			}
+		}
+	}
+
+	const getScoreTotal = scoreDetails => scoreDetails
+		.map(scoreDetail => scoreDetail.sectionNumber * (scoreDetail.double ? 2 : scoreDetail.triple ? 3 : 1))
+		.reduce((total, score) => total + score, 0);
+
+	const render = () => {
+		document.querySelector('.player1-score').innerText = `Player 1: ${getScoreTotal(player1Scores)}`;
+		document.querySelector('.player2-score').innerText = `Player 2: ${getScoreTotal(player2Scores)}`;
+		document.querySelector('.player-playing').innerText = `Player playing: ${playersTurn}`;
+	}
+
+	render();
+</script>
+<script src="dartboard.js" type="module"></script>
+
+<style>
+	body {
+		background-color: #222;
+		font-family: Arial, sans-serif;
+		color: white;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-evenly;
+	}
+	dart-board {
+		border-radius: 50%;
+		box-shadow: 0 0 20px orange;
+	}
+	.scoreboard-container {
+		width: 300px;
+		background-color: #333;
+		padding: 20px;
+		border-radius: 10px;
+		box-shadow: 0 0 20px orange;
+	}
+	.player1-score,
+	.player2-score {
+		font-size: 48px;
+	}
+	.player-playing {
+		font-weight: bold;
+	}
+</style>
+</body>
+</html>
