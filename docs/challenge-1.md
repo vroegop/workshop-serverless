@@ -98,6 +98,8 @@ Is this your first time? Then you need to prepare:
 
 > aws sso login --profile {profile-here}
 
+> cdk synth 
+
 > cdk deploy
 
 # Hooray!
@@ -108,14 +110,6 @@ Click yes a few times, check the console output for the URL and paste the URL in
 
 To execute your lambda locally for testing purposes, it requires the resources it needs (the DynamoDB table in this case)
 to already be created and have a name either hardcoded or in your local environment variables.
-
-Find your credentials
-
-![credentials.png](credentials.png)
-
-Update the configuration or add the environment variables as specified
-
-> npm run build
 
 Every time you change the lambda, you need to do `cdk synth`. Therefore, this combination of commands is the easiest:
 
