@@ -19,10 +19,15 @@ import {LambdaToDynamoDB} from '@aws-solutions-constructs/aws-lambda-dynamodb';
 // This automatically creates both a lambda and a DynamoDB table
 const lambdaToDynamo = new LambdaToDynamoDB(this, 'darts-lambda-to-dynamo', {
 	lambdaFunctionProps: {
+		functionName: 'darts-score-lambda',
 		code: Code.fromAsset(`lambda`),
 		runtime: Runtime.NODEJS_18_X,
 		handler: 'index.handler',
 	},
+	dynamoTableProps: {
+		tableName: 'darts-score-table',
+		partitionKey: { name: 'id', type: AttributeType.STRING },
+	}
 });
 
 // Automate cleanup, also in the constructor
@@ -59,7 +64,7 @@ new LambdaRestApi(this, 'ApiGatewayToLambdaPattern', {
 import {DynamoDBClient} from '@aws-sdk/client-dynamodb';
 import {DynamoDBDocumentClient, PutCommand} from '@aws-sdk/lib-dynamodb';
 
-const TableName = process.env.DDB_TABLE_NAME;
+const TableName = 'darts-score-table';
 const dynamo = DynamoDBDocumentClient.from(
 	new DynamoDBClient({}),
 	{marshallOptions: {removeUndefinedValues: true}}
@@ -85,10 +90,6 @@ export const handler = async (data) => {
 }
 ```
 
-> npm run build
-
----
-
 Is this your first time? Then you need to prepare:
 
 > aws configure sso
@@ -102,3 +103,25 @@ Is this your first time? Then you need to prepare:
 # Hooray!
 
 Click yes a few times, check the console output for the URL and paste the URL in the `index.html` file.
+
+---
+
+To execute your lambda locally for testing purposes, it requires the resources it needs (the DynamoDB table in this case)
+to already be created and have a name either hardcoded or in your local environment variables.
+
+Find your credentials
+
+![credentials.png](credentials.png)
+
+Update the configuration or add the environment variables as specified
+
+> npm run build
+
+Every time you change the lambda, you need to do `cdk synth`. Therefore, this combination of commands is the easiest:
+
+> cdk synth && sam local invoke --profile {profile-here} -t cdk.out/Challenge1Stack.template.json darts-score-lambda
+
+If you make changes to the stack outside of the lambda, make sure to re-deploy the stack before testing local interations
+with those changes. `cdk synth` does not deploy the changes but it does update your local cloudformation templates.
+
+---
