@@ -114,16 +114,3 @@ Is this your first time? Then you need to prepare:
 
 Click yes a few times, check the console output for the URL and paste the URL in the `index.html` file.
 
----
-
-To execute your lambda locally for testing purposes, it requires the resources it needs (the DynamoDB table in this case)
-to already be created and have a name either hardcoded or in your local environment variables.
-
-Every time you change the lambda, you need to do `cdk synth`. Therefore, this combination of commands is the easiest:
-
-> cdk synth && sam local invoke --profile {profile-here} -t cdk.out/Challenge1Stack.template.json darts-score-lambda
-
-If you make changes to the stack outside of the lambda, make sure to re-deploy the stack before testing local interations
-with those changes. `cdk synth` does not deploy the changes but it does update your local cloudformation templates.
-
----
