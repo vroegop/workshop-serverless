@@ -32,3 +32,5 @@ the local services.
     pip install awscli-local[ver1]
     
     localstack start
+
+You can then use the awslocal and cdklocal commands as if you are on AWS.
