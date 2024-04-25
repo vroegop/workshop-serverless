@@ -48,10 +48,6 @@ new LambdaRestApi(this, 'ApiGatewayToLambdaPattern', {
 	},
 	defaultMethodOptions: {
 		authorizationType: AuthorizationType.NONE,
-	},
-	deployOptions: {
-		accessLogDestination: new LogGroupLogDestination(new LogGroup(this, 'DartsLogs')),
-		loggingLevel: MethodLoggingLevel.INFO,
 	}
 });
 ```
